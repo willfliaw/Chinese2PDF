@@ -5,6 +5,7 @@ Command-line interface for Chinese → PDF generator.
 import argparse
 from pathlib import Path
 
+import pandas as pd
 from pdf_generator import generate_pdf
 
 
@@ -50,6 +51,20 @@ def parse_args() -> argparse.Namespace:
         default=True,
         help="Remove intermediate LaTeX files (default: True). Use --no-cleanup to keep them.",
     )
+    parser.add_argument(
+        "--hsk-csv", type=Path, help="Path to HSK CSV dataset to use for annotations."
+    )
+    parser.add_argument(
+        "--annotate-hsk",
+        nargs="*",
+        type=int,
+        help=(
+            "Levels to annotate with HSK tooltips.\n"
+            "Usage:\n"
+            "  --annotate-hsk        (all levels)\n"
+            "  --annotate-hsk 1 2 3  (only specific levels)"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -64,11 +79,18 @@ def main() -> None:
     args = parse_args()
     text = args.input.read_text(encoding="utf-8")
 
+    hsk_df = pd.DataFrame()
+    if args.hsk_csv:
+        hsk_df = pd.read_csv(args.hsk_csv)
+        if args.annotate_hsk:
+            hsk_df = hsk_df[hsk_df["level"].isin(args.annotate_hsk)]
+
     generate_pdf(
         text=text,
         title=args.title,
         filename=args.output,
         cleanup=args.cleanup,
+        hsk_df=hsk_df,
     )
 
 

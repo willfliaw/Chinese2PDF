@@ -8,8 +8,14 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+import pandas as pd
 from config import BASE_DIR, CJK_MAIN_FONT
-from text_formatter import hanzi_only, hanzi_with_ruby, parse_paragraphs, pinyin_only
+from text_formatter import (
+    render_hanzi,
+    parse_paragraphs,
+    pinyin_only,
+    vocabulary,
+)
 
 
 def generate_pdf(
@@ -17,6 +23,7 @@ def generate_pdf(
     title: str = "Chinese Text",
     filename: str | Path = "output.pdf",
     cleanup: bool = True,
+    hsk_df: pd.DataFrame = pd.DataFrame(),
 ) -> None:
     """
     Generate a PDF from Chinese text using LaTeX (via XeLaTeX).
@@ -48,10 +55,16 @@ def generate_pdf(
         template_path.read_text(encoding="utf-8")
         .replace("<<FONT>>", CJK_MAIN_FONT)
         .replace("<<TITLE>>", title)
-        .replace("<<HANZI>>", hanzi_only(parse_paragraphs(text)))
+        .replace("<<HANZI>>", render_hanzi(parse_paragraphs(text), hsk_df, with_ruby=False))
+        .replace("<<RUBY>>", render_hanzi(parse_paragraphs(text), hsk_df, with_ruby=True))
         .replace("<<PINYIN>>", pinyin_only(parse_paragraphs(text)))
-        .replace("<<RUBY>>", hanzi_with_ruby(parse_paragraphs(text)))
     )
+
+    vocabulary_section = vocabulary(text, hsk_df)
+    if vocabulary_section:
+        filled = filled.replace("<<VOCABULARY>>", vocabulary_section)
+    else:
+        filled = filled.replace("\\section*{Vocabulary}\n\\LatinSize\n<<VOCABULARY>>", "")
 
     jobname = filename.stem
 
@@ -62,19 +75,31 @@ def generate_pdf(
         tex_file.write_text(filled, encoding="utf-8")
 
         # Run XeLaTeX
-        subprocess.run(
-            [
-                "xelatex",
-                "-interaction=nonstopmode",
-                f"-jobname={jobname}",
-                f"-output-directory={tmpdir}",
-                str(tex_file),
-            ],
-            check=True,
-        )
+        try:
+            subprocess.run(
+                [
+                    "xelatex",
+                    "-interaction=nonstopmode",
+                    f"-jobname={jobname}",
+                    f"-output-directory={tmpdir}",
+                    str(tex_file),
+                ],
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            # Copy auxiliary files for debugging
+            for ext in (".aux", ".log", ".tex"):
+                produced_file = tmpdir / f"{jobname}{ext}"
+                if produced_file.exists():
+                    shutil.copy(produced_file, out_dir / produced_file.name)
+
+            raise RuntimeError("XeLaTeX failed, see log above.") from e
 
         # Move the final PDF into the requested location
         produced_pdf = tmpdir / f"{jobname}.pdf"
+        if not produced_pdf.exists():
+            raise FileNotFoundError("XeLaTeX did not produce a PDF output.")
+
         shutil.move(produced_pdf, filename)
 
         if not cleanup:

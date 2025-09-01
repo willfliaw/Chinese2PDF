@@ -11,15 +11,14 @@ from pypinyin import Style
 # Paths
 # ---------------------------------------------------------------------
 # Base directory of this package (used for locating LaTeX templates)
-BASE_DIR = Path(__file__).resolve().parent
-
+BASE_DIR: Path = Path(__file__).resolve().parent
 
 # ---------------------------------------------------------------------
 # Fonts
 # ---------------------------------------------------------------------
 
 # Main CJK font (can be a system font name or a path to a .ttf/.otf file)
-CJK_MAIN_FONT = "田英章硬笔楷书简体.ttf" # Custom font path
+CJK_MAIN_FONT: str = "田英章硬笔楷书简体.ttf"  # Custom font path
 
 # Alternative examples
 # CJK_MAIN_FONT = "KaiTi"     # 楷体
@@ -32,7 +31,7 @@ CJK_MAIN_FONT = "田英章硬笔楷书简体.ttf" # Custom font path
 # Pinyin & Tones
 # ---------------------------------------------------------------------
 # Tone colors for LaTeX rendering
-TONE_COLORS = {
+TONE_COLORS: dict[str, str] = {
     "1": "red",
     "2": "green!50!black",
     "3": "blue",
@@ -41,11 +40,11 @@ TONE_COLORS = {
 }
 
 # Pinyin style (TONE = diacritics, TONE3 = numeric)
-TONE_STYLE = Style.TONE
-# TONE_STYLE = Style.TONE3
+TONE_STYLE: Style = Style.TONE
+# TONE_STYLE: Style = Style.TONE3
 
-# Map accented vowels → tone number
-DIACRITIC_TO_TONE = {
+# Map diacritic characters to tone numbers
+DIACRITIC_TO_TONE: dict[str, str] = {
     **dict.fromkeys("āēīōūǖ", "1"),
     **dict.fromkeys("áéíóúǘ", "2"),
     **dict.fromkeys("ǎěǐǒǔǚ", "3"),
@@ -61,3 +60,16 @@ PUNCT_OPEN_PATTERN = re.compile(r"^[“‘（《〈【『「〖〔［｛]+$")
 
 # Regex for closing punctuation (binds backward)
 PUNCT_CLOSE_PATTERN = re.compile(r"^[，。？！：；、”’）》〉】』」〗〕］｝…—]+$")
+
+# ---------------------------------------------------------------------
+# Punctuation
+# ---------------------------------------------------------------------
+# Colors for HSK levels (1-6)
+HSK_LEVEL_COLORS = {
+    1: "green!20",
+    2: "cyan!20",
+    3: "blue!20",
+    4: "orange!20",
+    5: "red!20",
+    6: "purple!20",
+}
