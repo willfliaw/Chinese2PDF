@@ -1,0 +1,73 @@
+\documentclass[12pt]{article}
+
+% ---------------------------------------------------------------------
+% Packages
+% ---------------------------------------------------------------------
+\usepackage{xeCJK}                 % Chinese typesetting
+\usepackage{xcolor}                % Colors
+\usepackage{ruby}                  % Ruby annotations (pinyin above Hanzi)
+\usepackage[margin=2cm]{geometry}  % Page margins
+\usepackage{indentfirst}           % Indent first paragraph
+\usepackage{pdfcomment}            % Tooltips for HSK annotations
+\usepackage{fontawesome5}          % FontAwesome icons
+\usepackage{longtable}             % Long tables that can span pages
+
+
+% ---------------------------------------------------------------------
+% Font Setup
+% ---------------------------------------------------------------------
+% Chinese font
+\setCJKmainfont{<<FONT>>}
+
+% Glue spacing between Hanzi
+\xeCJKsetup{CJKglue=\hskip 0pt plus 0.08\textwidth}
+
+
+% ---------------------------------------------------------------------
+% Custom Macros
+% ---------------------------------------------------------------------
+% Sizes
+\newcommand{\HanziSize}{\fontsize{25pt}{40pt}\selectfont}
+\newcommand{\LatinSize}{\fontsize{14pt}{20pt}\selectfont}
+\renewcommand{\LARGE}{\fontsize{30pt}{40pt}\selectfont}
+
+% Pinyin formatting
+\newcommand{\pysyl}[2]{\textcolor{#1}{#2}} % syllable with tone color
+\newcommand{\pywordsep}{\hskip .4em plus .3em minus .15em}
+
+% Ruby tweaks
+\renewcommand{\rubysize}{0.4}   % size relative to Hanzi
+\renewcommand{\rubysep}{-0.8ex} % vertical spacing
+
+
+% ---------------------------------------------------------------------
+% Document
+% ---------------------------------------------------------------------
+\begin{document}
+
+\begin{center}
+    {\LARGE \textbf{<<TITLE>>}}
+\end{center}
+
+\vspace{1cm}
+
+\section*{Hanzi Only}
+\HanziSize
+<<HANZI>>
+
+\newpage
+\section*{Hanzi + Pinyin}
+\HanziSize
+<<RUBY>>
+
+\newpage
+\section*{Pinyin Only}
+\LatinSize
+<<PINYIN>>
+
+\newpage
+\section*{Vocabulary}
+\LatinSize
+<<VOCABULARY>>
+
+\end{document}
